@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Real Callbreak</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0e1a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Real Callbreak">
+<link rel="apple-touch-icon" href="/icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1468,6 +1474,123 @@ html, body {
   padding: 1px 5px;
 }
 .iscore b { color: var(--gold2); }
+
+/* ══════════════════════════════
+   MULTIPLAYER SCREENS
+══════════════════════════════ */
+#screen-mp {
+  position: fixed; inset: 0; z-index: 310;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 35%, #1a3522 0%, #0e1a12 70%);
+  gap: 18px; padding: 32px 24px;
+  animation: fadeIn 0.3s ease;
+}
+#screen-mp-lobby {
+  position: fixed; inset: 0; z-index: 320;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 35%, #1a3522 0%, #0e1a12 70%);
+  gap: 16px; padding: 32px 24px;
+  animation: fadeIn 0.3s ease;
+}
+.mp-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; color: var(--gold2);
+  letter-spacing: 1px; text-align: center;
+}
+.mp-sub {
+  font-size: 13px; color: var(--muted);
+  text-align: center; line-height: 1.6;
+}
+.mp-input {
+  width: 100%; max-width: 280px;
+  padding: 14px 18px; border-radius: 10px;
+  border: 1.5px solid rgba(200,168,75,0.4);
+  background: rgba(255,255,255,0.05);
+  color: var(--cream);
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; text-align: center;
+  outline: none; letter-spacing: 6px;
+  text-transform: uppercase;
+  transition: border-color 0.15s;
+  caret-color: var(--gold);
+}
+.mp-input::placeholder { color: rgba(242,232,208,0.25); letter-spacing: 2px; font-size: 16px; }
+.mp-input:focus { border-color: var(--gold); }
+.mp-divider {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; max-width: 280px;
+}
+.mp-divider::before, .mp-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+.mp-divider span { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.mp-back {
+  font-size: 13px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  letter-spacing: 1px; text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif;
+  padding: 8px; margin-top: 4px;
+}
+.mp-back:hover { color: var(--cream); }
+
+/* Room code display */
+#mp-room-code {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; color: var(--gold2);
+  letter-spacing: 12px; text-align: center;
+  background: rgba(200,168,75,0.08);
+  border: 1px solid rgba(200,168,75,0.25);
+  border-radius: 12px; padding: 16px 24px;
+  width: 100%; max-width: 280px;
+}
+#mp-room-code-label {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 2px; text-transform: uppercase;
+  text-align: center;
+}
+
+/* Player slots in lobby */
+#mp-player-list {
+  width: 100%; max-width: 280px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.mp-player-slot {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(200,168,75,0.15);
+  border-radius: 8px; padding: 10px 14px;
+}
+.mp-player-slot.filled { border-color: rgba(200,168,75,0.4); }
+.mp-player-slot.you { border-color: rgba(200,168,75,0.7); background: rgba(200,168,75,0.08); }
+.mp-slot-num {
+  font-size: 12px; color: var(--muted);
+  width: 16px; text-align: center; flex-shrink: 0;
+}
+.mp-slot-name {
+  flex: 1; font-size: 14px; color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+}
+.mp-slot-name.empty { color: var(--muted); font-style: italic; }
+.mp-slot-badge {
+  font-size: 10px; color: var(--gold);
+  background: rgba(200,168,75,0.12);
+  border-radius: 10px; padding: 2px 8px;
+  letter-spacing: 0.5px;
+}
+
+/* MP status message */
+#mp-status {
+  font-size: 13px; color: var(--muted);
+  text-align: center; font-style: italic;
+  min-height: 18px;
+}
+#mp-error {
+  font-size: 13px; color: #e08080;
+  text-align: center; min-height: 18px;
+}
 </style>
 </head>
 <body>
@@ -1664,6 +1787,7 @@ html, body {
     </div>
     <button class="btn-home-primary" onclick="Home.startGame()">New Game</button>
     <button class="btn-home-secondary" onclick="Home.continueLast()" id="btn-continue" style="display:none">Continue Game</button>
+    <button class="btn-home-secondary" onclick="MP.showMenu()">Multiplayer 🌐</button>
     <button class="btn-home-secondary" onclick="HowTo.open()">How to Play</button>
     <button class="btn-home-exit" onclick="Home.exitApp()">Exit</button>
   </div>
@@ -1763,6 +1887,45 @@ html, body {
   </div>
 </div>
 
+<!-- ══ MULTIPLAYER MENU ══ -->
+<div id="screen-mp">
+  <div style="font-size:48px">🌐</div>
+  <div class="mp-title">Multiplayer</div>
+  <p class="mp-sub">Play with friends online.<br>Share a room code to join the same game.</p>
+  <div style="width:100%;max-width:280px;display:flex;flex-direction:column;gap:12px;margin-top:8px">
+    <button class="btn-home-primary" onclick="MP.goCreate()">Create Room</button>
+    <button class="btn-home-secondary" onclick="MP.goJoin()">Join Room</button>
+  </div>
+  <button class="mp-back" onclick="MP.back()">← Back to Menu</button>
+</div>
+
+<!-- ══ MULTIPLAYER JOIN ══ -->
+<div id="screen-mp-join" style="position:fixed;inset:0;z-index:315;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 35%,#1a3522 0%,#0e1a12 70%);gap:18px;padding:32px 24px;animation:fadeIn 0.3s ease">
+  <div class="mp-title">Join Room</div>
+  <p class="mp-sub">Enter the 4-letter room code<br>shared by your host.</p>
+  <input class="mp-input" id="mp-join-code" maxlength="4" placeholder="ABCD" autocomplete="off" autocorrect="off" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter') MP.joinRoom()"/>
+  <div id="mp-error"></div>
+  <button class="btn-home-primary" style="width:100%;max-width:280px" onclick="MP.joinRoom()">Join</button>
+  <button class="mp-back" onclick="MP.backToMPMenu()">← Back</button>
+</div>
+
+<!-- ══ MULTIPLAYER LOBBY ══ -->
+<div id="screen-mp-lobby">
+  <div class="mp-title" id="mp-lobby-title">Waiting for Players</div>
+  <div id="mp-room-code-label">Room Code</div>
+  <div id="mp-room-code">—</div>
+  <div id="mp-player-list">
+    <div class="mp-player-slot" id="mp-slot-0"><span class="mp-slot-num">1</span><span class="mp-slot-name empty" id="mp-slot-name-0">Waiting…</span></div>
+    <div class="mp-player-slot" id="mp-slot-1"><span class="mp-slot-num">2</span><span class="mp-slot-name empty" id="mp-slot-name-1">Waiting…</span></div>
+    <div class="mp-player-slot" id="mp-slot-2"><span class="mp-slot-num">3</span><span class="mp-slot-name empty" id="mp-slot-name-2">Waiting…</span></div>
+    <div class="mp-player-slot" id="mp-slot-3"><span class="mp-slot-num">4</span><span class="mp-slot-name empty" id="mp-slot-name-3">Waiting…</span></div>
+  </div>
+  <div id="mp-status">Share the code with your friends!</div>
+  <button class="btn-home-primary" id="mp-start-btn" style="width:100%;max-width:280px;display:none" onclick="MP.startGame()">Start Game</button>
+  <button class="mp-back" onclick="MP.leaveRoom()">← Leave Room</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
 <script>
 // ═══════════════════════════════════════
 //  SOUND ENGINE (Web Audio, no files)
@@ -2468,23 +2631,73 @@ const UI = {
     const d=document.getElementById('dot-'+pi);
     if(d) d.className='dot'+(on?' on':'');
   },
-  setAllDots(active){
-    for(let i=0;i<4;i++) this.setDot(i,i===active);
+  setAllDots(activeSeat, G){
+    // In MP mode, remap seat to UI slot
+    const mySeat = (G && G._mp && G._mySeat != null) ? G._mySeat : 0;
+    for(let slot=0; slot<4; slot++){
+      const seat = (mySeat + slot) % 4;
+      this.setDot(slot, seat === activeSeat);
+    }
   },
 
   updatePlayerInfo(G){
-    for(let i=0;i<4;i++){
-      const b=document.getElementById('bid-'+i);
-      const w=document.getElementById('won-'+i);
-      if(b) b.textContent=G.bids[i]??'—';
-      if(w) w.textContent=G.won[i]??0;
+    // In MP mode, remap seats so mySeat=bottom(0), +1=west(1), +2=north(2), +3=east(3)
+    const mySeat = (G._mp && G._mySeat != null) ? G._mySeat : 0;
+    const names = NAMES;
+
+    // UI slots: 0=bottom(you), 1=west, 2=north, 3=east
+    // Map UI slot → actual seat index
+    const slotToSeat = [
+      mySeat,
+      (mySeat + 1) % 4,
+      (mySeat + 2) % 4,
+      (mySeat + 3) % 4,
+    ];
+
+    // Update bottom player (you)
+    const youLabel = document.getElementById('you-name-label');
+    if (youLabel) youLabel.textContent = names[slotToSeat[0]] || 'You';
+    const b0 = document.getElementById('bid-0');
+    const w0 = document.getElementById('won-0');
+    if (b0) b0.textContent = G.bids[slotToSeat[0]] ?? '—';
+    if (w0) w0.textContent = G.won[slotToSeat[0]] ?? 0;
+
+    // Update West (slot 1), North (slot 2), East (slot 3)
+    const posNames = {1:'west', 2:'north', 3:'east'};
+    for (let slot = 1; slot <= 3; slot++) {
+      const seat = slotToSeat[slot];
+      const pos = posNames[slot];
+      // Update name label in pill
+      const pill = document.getElementById(pos+'-zone') || document.getElementById(pos === 'west' ? 'west-zone' : pos === 'north' ? 'north-zone' : 'east-zone');
+      if (pill) {
+        const pname = pill.querySelector('.pname');
+        if (pname) pname.textContent = names[seat] || pos.charAt(0).toUpperCase()+pos.slice(1);
+      }
+      const b = document.getElementById('bid-'+slot);
+      const w = document.getElementById('won-'+slot);
+      if (b) b.textContent = G.bids[seat] ?? '—';
+      if (w) w.textContent = G.won[seat] ?? 0;
     }
   },
 
   updateScores(G){
-    document.getElementById('isc-1').textContent=G.scores[1];
-    document.getElementById('isc-2').textContent=G.scores[2];
-    document.getElementById('isc-3').textContent=G.scores[3];
+    const mySeat = (G._mp && G._mySeat != null) ? G._mySeat : 0;
+    const slotToSeat = [
+      mySeat,
+      (mySeat + 1) % 4,
+      (mySeat + 2) % 4,
+      (mySeat + 3) % 4,
+    ];
+    // Update inline score labels with first letter of player name + score
+    [1,2,3].forEach(slot => {
+      const seat = slotToSeat[slot];
+      const el = document.getElementById('isc-' + slot);
+      if(el) {
+        const name = NAMES[seat] || ['W','N','E'][slot-1];
+        el.parentElement.childNodes[0].textContent = name.charAt(0).toUpperCase() + ' ';
+        el.textContent = G.scores[seat];
+      }
+    });
     document.getElementById('round-badge').textContent=`ROUND ${G.round} / ${TOTAL_ROUNDS}`;
   },
 
@@ -2499,13 +2712,15 @@ const UI = {
   renderYourHand(G){
     const el=document.getElementById('hand-0');
     el.innerHTML='';
+    const mySeat = G._mp ? (G._mySeat || 0) : 0;
     const led=G.trick.length?G.trick[0].card.s:null;
-    const leg=G.phase==='playing'&&G.cur===0?legal(G.hands[0],led,G.trick).map(c=>c.id):[];
+    const isMyTurn = G.phase==='playing' && G.cur===mySeat;
+    const leg=isMyTurn ? legal(G.hands[mySeat],led,G.trick).map(c=>c.id) : [];
 
-    G.hands[0].forEach((card, idx) => {
+    (G.hands[mySeat]||[]).forEach((card, idx) => {
       const wrap=document.createElement('div');
       const isLegal=leg.includes(card.id);
-      wrap.className='card-wrap '+(G.phase==='playing'&&G.cur===0?(isLegal?'legal':'illegal'):'');
+      wrap.className='card-wrap '+(isMyTurn?(isLegal?'legal':'illegal'):'');
       wrap.dataset.cardId = card.id;
       wrap.appendChild(cardFaceEl(card));
       if(isLegal){
@@ -2518,7 +2733,7 @@ const UI = {
         wrap.classList.add('deal-anim');
       }
       // Shake illegal taps
-      if(!isLegal && G.phase==='playing' && G.cur===0){
+      if(!isLegal && isMyTurn){
         wrap.addEventListener('click', ()=>{
           SFX.illegal();
           wrap.classList.remove('shake');
@@ -2561,9 +2776,11 @@ const UI = {
   },
 
   showBidOverlay(G){
-    const trumps=G.hands[0].filter(c=>c.s===TRUMP).length;
+    const mySeat = G._mp ? (G._mySeat || 0) : 0;
+    const myHand = G.hands[mySeat] || [];
+    const trumps=myHand.filter(c=>c.s===TRUMP).length;
     document.getElementById('trump-count').textContent=trumps;
-    const suggested = botBid(G.hands[0]);
+    const suggested = botBid(myHand);
     document.getElementById('suggested-bid').textContent = suggested;
     G._suggestedBid = suggested;
     G._pendingBid = null;
@@ -3271,7 +3488,7 @@ const Game = {
       UI.renderYourHand(G);
       UI.updatePlayerInfo(G);
       UI.updateScores(G);
-      UI.setAllDots(-1);
+      UI.setAllDots(-1, G);
       for(let i=0;i<4;i++) document.getElementById('trick-'+i).innerHTML='';
       if(G.trick && G.trick.length) UI.renderTrick(G.trick);
 
@@ -3281,7 +3498,7 @@ const Game = {
         // were interrupted mid-bidding-sequence.
         this.advanceBidding(G);
       } else if(G.phase === 'playing'){
-        UI.setAllDots(G.cur);
+        UI.setAllDots(G.cur, G);
         if(G.cur === 0){
           UI.renderYourHand(G);
           if(G.hands[0].length === 1){
@@ -3333,7 +3550,7 @@ const Game = {
     document.getElementById('abandon-btn').classList.add('visible');
     UI.updatePlayerInfo(G);
     UI.updateScores(G);
-    UI.setAllDots(-1);
+    UI.setAllDots(-1, G);
     UI.setYourTurn(false);
 
     // Clear ALL cards from screen immediately before deal animation
@@ -3364,7 +3581,7 @@ const Game = {
           UI.renderYourHand(G);
         } else {
           // Bot bids after a short delay so player can see the sequence
-          UI.setAllDots(pi);
+          UI.setAllDots(pi, G);
           UI.setStatus(`${NAMES[pi]} is bidding…`);
           setTimeout(()=>{
             G.bids[pi] = botBid(G.hands[pi]);
@@ -3407,7 +3624,7 @@ const Game = {
     SaveGame.save(G); // save with correct cur // first trick led by player left of dealer
     UI.hideBidOverlay();
     UI.updatePlayerInfo(G);
-    UI.setAllDots(G.cur);
+    UI.setAllDots(G.cur, G);
     if(G.cur === 0){
       UI.renderYourHand(G);
       if(G.hands[0].length === 1){
@@ -3429,7 +3646,7 @@ const Game = {
     G._humanBid = bid;
     UI.hideBidOverlay();
     UI.updatePlayerInfo(G);
-    UI.setAllDots(-1);
+    UI.setAllDots(-1, G);
     document.getElementById('undo-bid-btn').classList.add('visible');
     SaveGame.save(G);
     this.advanceBidding(G);
@@ -3437,7 +3654,15 @@ const Game = {
 
   confirmBid(){
     const G = this.G;
-    if(G._pendingBid) this.humanBid(G._pendingBid);
+    if(!G._pendingBid) return;
+    if(G._mp){
+      // Multiplayer — send bid to server, server will advance bidding
+      MP.sendBid(G._pendingBid);
+      UI.hideBidOverlay();
+      UI.setStatus('Bid placed! Waiting for others…');
+    } else {
+      this.humanBid(G._pendingBid);
+    }
   },
 
   confirmAbandon(){
@@ -3482,6 +3707,18 @@ const Game = {
 
   humanPlay(card){
     const G = this.G;
+    if(G._mp){
+      // Multiplayer — send card to server
+      const mySeat = G._mySeat;
+      if(G.phase !== 'playing' || G.cur !== mySeat) return;
+      const led = G.trick.length ? G.trick[0].card.s : null;
+      const leg = legal(G.hands[mySeat], led, G.trick);
+      if(!leg.find(c=>c.id===card.id)){ SFX.illegal(); return; }
+      MP.sendCard(card.id);
+      UI.setYourTurn(false);
+      UI.setStatus('Card played! Waiting for others…');
+      return;
+    }
     if(G.phase !== 'playing' || G.cur !== 0) return;
     if(Animator.isAnimating) return; // wait for flight to finish
     // Cancel any pending auto-play timer
@@ -3510,12 +3747,12 @@ const Game = {
       UI.renderTrick(G.trick);
       UI.renderYourHand(G);
       for(let i=1;i<=3;i++) UI.renderBotHand(i, G.hands[i].length);
-      UI.setAllDots(-1);
+      UI.setAllDots(-1, G);
 
       if(G.trick.length < 4){
         G.cur = (pi + 1) % 4;
         SaveGame.save(G);
-        UI.setAllDots(G.cur);
+        UI.setAllDots(G.cur, G);
         if(G.cur !== 0){
           UI.setStatus(`${NAMES[G.cur]} is thinking…`);
           setTimeout(()=>this.doBotPlay(), 500);
@@ -3626,7 +3863,7 @@ const Game = {
         return;
       }
       G.cur = winner;
-      UI.setAllDots(winner);
+      UI.setAllDots(winner, G);
       if(winner === 0){
         UI.renderYourHand(G);
         if(G.hands[0].length === 1){
@@ -3740,7 +3977,7 @@ const Home = {
       UI.renderYourHand(G);
       UI.updatePlayerInfo(G);
       if(G.phase === 'playing'){
-        UI.setAllDots(G.cur);
+        UI.setAllDots(G.cur, G);
         if(G.cur === 0){
           UI.setStatus('Your turn — tap a card to play.');
           UI.setYourTurn(true);
@@ -4005,6 +4242,8 @@ window.addEventListener('error', e=>{
 window.addEventListener('load', ()=>{
   RoundSettings.init();
   PlayerName.init();
+  // Try to auto-reconnect if we were in a game
+  setTimeout(() => MP.tryReconnect(), 800);
 });
 
 // Override Game.start to hide home first
@@ -4030,8 +4269,537 @@ UI.showGameOver = function(G){
     goWrap.parentElement.insertBefore(homeBtn, goWrap.nextSibling.nextSibling);
   }
 };
-</script>
-<script>
+// ═══════════════════════════════════════
+//  MULTIPLAYER CLIENT
+// ═══════════════════════════════════════
+const MP = (() => {
+  // Auto-detect server URL from current page host
+  const SERVER_URL = 'https://callbreak-server-production.up.railway.app'; // for ngrok/railway: same host, no extra port
+
+  let socket = null;
+  let mySeat = -1;
+  let isHost  = false;
+  let mpActive = false; // true when in an MP game
+
+  const TOKEN_KEY = 'callbreak_mp_token';
+  const ROOM_KEY  = 'callbreak_mp_room';
+
+  function saveSession(token, code) {
+    try { localStorage.setItem(TOKEN_KEY, token); localStorage.setItem(ROOM_KEY, code); } catch(e) {}
+  }
+  function clearSession() {
+    try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(ROOM_KEY); } catch(e) {}
+  }
+  function tryAutoReconnect() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if(!token) return;
+    connect();
+    const emit = () => socket.emit('reconnect_with_token', { token });
+    if(socket.connected) emit(); else socket.once('connect', emit);
+  }
+
+  function connect() {
+    if (socket && socket.connected) return;
+    if (socket) { socket.disconnect(); }
+    socket = io(SERVER_URL, { transports: ['websocket'] });
+
+    socket.on('connect', () => console.log('MP connected'));
+    socket.on('disconnect', () => {
+      if (mpActive) {
+        alert('Disconnected from server.');
+        leaveRoom();
+      }
+    });
+
+    socket.on('error', msg => {
+      document.getElementById('mp-error').textContent = msg;
+    });
+
+    // ── Lobby events ──
+    socket.on('room_created', ({ code, seat, token }) => {
+      mySeat = seat;
+      isHost = true;
+      if(token) saveSession(token, code);
+      showLobby(code);
+    });
+
+    socket.on('room_joined', ({ code, seat, token }) => {
+      mySeat = seat;
+      isHost = false;
+      if(token) saveSession(token, code);
+      showLobby(code);
+    });
+
+    socket.on('lobby_update', ({ code, players, totalRounds }) => {
+      document.getElementById('mp-room-code').textContent = code;
+      // Update slots
+      for (let i = 0; i < 4; i++) {
+        const p = players.find(p => p.seat === i);
+        const nameEl = document.getElementById('mp-slot-name-' + i);
+        const slotEl = document.getElementById('mp-slot-' + i);
+        if (p) {
+          nameEl.textContent = p.name;
+          nameEl.classList.remove('empty');
+          slotEl.classList.add('filled');
+          if (p.seat === mySeat) {
+            slotEl.classList.add('you');
+            // Add YOU badge if not present
+            if (!slotEl.querySelector('.mp-slot-badge')) {
+              const badge = document.createElement('span');
+              badge.className = 'mp-slot-badge';
+              badge.textContent = 'YOU';
+              slotEl.appendChild(badge);
+            }
+          }
+        } else {
+          nameEl.textContent = 'Waiting…';
+          nameEl.classList.add('empty');
+          slotEl.classList.remove('filled', 'you');
+          const badge = slotEl.querySelector('.mp-slot-badge');
+          if (badge) badge.remove();
+        }
+      }
+      // Show start button to host if ≥2 players
+      if (isHost) {
+        const startBtn = document.getElementById('mp-start-btn');
+        startBtn.style.display = players.length >= 2 ? 'block' : 'none';
+        document.getElementById('mp-status').textContent =
+          players.length < 4
+            ? `${players.length}/4 players — waiting for more, or start now`
+            : 'All 4 players ready!';
+      } else {
+        document.getElementById('mp-status').textContent = 'Waiting for host to start…';
+      }
+    });
+
+    // ── Game events ──
+    socket.on('game_state', state => {
+      mpActive = true;
+      // Hide lobby, show game
+      document.getElementById('screen-mp-lobby').style.display = 'none';
+
+      // Apply names from server (seat-indexed)
+      if (state.names) {
+        state.names.forEach((n, i) => { NAMES[i] = n; });
+        const label = document.getElementById('you-name-label');
+        if (label) label.textContent = state.names[state.mySeat] || 'You';
+      }
+
+      // Update or init game state from server
+      if (!Game.G) {
+        Game.G = {
+          round: state.round,
+          dealer: state.dealer,
+          scores: state.scores,
+          hands: [[], [], [], []],
+          bids: state.bids,
+          won: state.won,
+          trick: state.trick,
+          trickNum: state.trickNum,
+          cur: state.cur,
+          firstOfRound: state.cur,
+          phase: state.phase,
+          roundHistory: state.roundHistory || [],
+          _mp: true,
+          _mySeat: state.mySeat,
+        };
+      } else {
+        Object.assign(Game.G, {
+          round: state.round,
+          dealer: state.dealer,
+          scores: state.scores,
+          bids: state.bids,
+          won: state.won,
+          trick: state.trick,
+          trickNum: state.trickNum,
+          cur: state.cur,
+          phase: state.phase,
+          roundHistory: state.roundHistory || [],
+          _mp: true,
+          _mySeat: state.mySeat,
+        });
+      }
+
+      // My hand (server sends only our cards)
+      Game.G.hands[state.mySeat] = state.myHand;
+
+      // Remap trick seats to UI slots
+      if (state.trick && state.trick.length) {
+        Game.G.trick = state.trick.map(t => ({
+          ...t,
+          pi: ((t.pi - state.mySeat) + 4) % 4
+        }));
+      }
+
+      const G = Game.G;
+
+      // Update bot hand counts — remap seat to UI slot
+      const mySeat = state.mySeat;
+
+      // Deal animation for new round — only on first game_state of a round
+      const isNewRound = state.phase === 'bidding' && state.trickNum === 1 &&
+                         (!Game.G._lastDealtRound || Game.G._lastDealtRound !== state.round);
+      if (isNewRound) {
+        Game.G._lastDealtRound = state.round;
+        // Clear all cards first
+        for(let i=0;i<4;i++) document.getElementById('trick-'+i).innerHTML='';
+        document.getElementById('hand-0').innerHTML='';
+        document.getElementById('north-hand').innerHTML='';
+        document.getElementById('west-hand').innerHTML='';
+        document.getElementById('east-hand').innerHTML='';
+        SFX.deal();
+      }
+
+      state.handCounts.forEach((count, seat) => {
+        if (seat === mySeat) return;
+        const slot = ((seat - mySeat) + 4) % 4;
+        if (!isNewRound) UI.renderBotHand(slot, count);
+      });
+
+      Home.hide();
+      UI.hideAllOverlays();
+      // Hide all MP screens
+      ['screen-mp','screen-mp-join','screen-mp-lobby'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      document.getElementById('round-badge').textContent = `ROUND ${G.round} / ${state.totalRounds}`;
+      document.getElementById('abandon-btn').classList.add('visible');
+      UI.updatePlayerInfo(G);
+      UI.updateScores(G);
+      if (!isNewRound) UI.renderYourHand(G);
+
+      // Deal animation for new round
+      if (isNewRound) {
+        Animator.dealCards(G, () => {
+          UI.renderYourHand(G);
+          state.handCounts.forEach((count, seat) => {
+            if (seat === mySeat) return;
+            const slot = ((seat - mySeat) + 4) % 4;
+            UI.renderBotHand(slot, count);
+          });
+        });
+      }
+
+      // If trick is empty from server and we're not animating, clear DOM slots
+      if (!G._trickAnimating) {
+        if (!G.trick || G.trick.length === 0) {
+          for (let i = 0; i < 4; i++) {
+            const el = document.getElementById('trick-' + i);
+            if (el) el.innerHTML = '';
+          }
+        } else {
+          UI.renderTrick(G.trick);
+        }
+      } else {
+        // Animating — re-render trick to ensure cards are visible for sweep
+        if (G.trick && G.trick.length) UI.renderTrick(G.trick);
+      }
+
+      if (G.phase === 'bidding') {
+        UI.setAllDots(G.cur, G);
+        if (G.cur === state.mySeat && G.bids[state.mySeat] === null) {
+          UI.showBidOverlay(G);
+          UI.setStatus('Your turn to bid!');
+        } else {
+          UI.hideBidOverlay();
+          const bidderName = NAMES[G.cur] || `Player ${G.cur}`;
+          UI.setStatus(G.bids[G.cur] !== null ? 'Waiting for others to bid…' : `${bidderName} is bidding…`);
+        }
+      } else if (G.phase === 'playing') {
+        UI.setAllDots(G.cur, G);
+        if (G.cur === state.mySeat) {
+          UI.setYourTurn(true);
+          // Auto-play if last card
+          if ((G.hands[state.mySeat] || []).length === 1) {
+            UI.setStatus('Last card — playing automatically…');
+            UI.setYourTurn(false);
+            setTimeout(() => {
+              const card = G.hands[state.mySeat][0];
+              if (card) MP.sendCard(card.id);
+            }, 1000);
+          } else {
+            UI.setStatus('Your turn — tap a card to play!');
+            // Alert player it's their turn — repeat every second until they play
+            SFX.trickWin();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            G._turnAlertInterval = setInterval(() => {
+              // Stop if no longer our turn
+              if (!Game.G || Game.G.cur !== state.mySeat || Game.G.phase !== 'playing') {
+                clearInterval(G._turnAlertInterval);
+                G._turnAlertInterval = null;
+                return;
+              }
+              SFX.trickWin();
+              if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }, 2000);
+          }
+        } else {
+          UI.setYourTurn(false);
+          UI.setStatus(`${NAMES[G.cur] || 'Opponent'} is playing…`);
+        }
+      }
+    });
+
+    socket.on('card_played', ({ seat, card }) => {
+      const G = Game.G;
+      if (!G) return;
+      G.trick = G.trick || [];
+      const mySeat = G._mySeat || 0;
+      const uiSlot = ((seat - mySeat) + 4) % 4;
+      if (!G.trick.find(t => t.pi === uiSlot)) {
+        G.trick.push({ pi: uiSlot, card });
+      }
+      SFX.cardPlay();
+
+      // Update bot hand count
+      if (seat !== mySeat) {
+        const slot = ((seat - mySeat) + 4) % 4;
+        const remaining = Math.max(0, (G.hands[seat] ? G.hands[seat].length : 13) - 1);
+        UI.renderBotHand(slot, remaining);
+      }
+
+      // Animate card flying to trick slot
+      const toRect = Animator.getTrickSlotRect(uiSlot);
+      if (uiSlot === 0) {
+        // My card — find it in my hand DOM and fly it
+        const handEl = document.getElementById('hand-0');
+        let fromWrap = null;
+        if (handEl) handEl.querySelectorAll('.card-wrap').forEach(w => { if(w.dataset.cardId === card.id) fromWrap = w; });
+        if (fromWrap && toRect) {
+          const fromRect = fromWrap.getBoundingClientRect();
+          const svgEl = fromWrap.querySelector('div');
+          fromWrap.classList.add('card-played-out');
+          Animator.fly(fromRect, toRect, svgEl || fromWrap, () => UI.renderTrick(G.trick));
+        } else {
+          UI.renderTrick(G.trick);
+        }
+      } else {
+        // Opponent card — fly from their zone
+        const fromRect = Animator.getBotZoneRect(uiSlot);
+        if (fromRect && toRect) {
+          const fdDiv = document.createElement('div');
+          fdDiv.style.cssText = 'width:52px;height:76px;border-radius:7px;background:linear-gradient(135deg,#1c3a7a,#0d1f4a);border:1.5px solid #2a4a99;';
+          const botFrom = {
+            x: fromRect.x + fromRect.width/2 - 26,
+            y: fromRect.y + fromRect.height/2 - 38,
+            width: 52, height: 76,
+          };
+          Animator.fly(botFrom, toRect, fdDiv, () => UI.renderTrick(G.trick));
+        } else {
+          UI.renderTrick(G.trick);
+        }
+      }
+    });
+
+    socket.on('trick_won', ({ winner, winnerName, trick }) => {
+      const G = Game.G;
+      if (!G) return;
+      const mySeat = G._mySeat || 0;
+      const winnerSlot = ((winner - mySeat) + 4) % 4;
+      UI.flashTrick(`${winnerName} wins!`);
+      if (winnerSlot === 0) SFX.trickWin(); else SFX.trickLose();
+
+      G._trickAnimating = true;
+
+      // Remap server trick seats to UI slots and render immediately
+      const remapped = (trick || []).map(t => ({
+        ...t,
+        pi: ((t.pi - mySeat) + 4) % 4
+      }));
+
+      // Force render trick cards into slots right now
+      if (remapped.length) {
+        UI.renderTrick(remapped);
+        G.trick = remapped;
+      }
+
+      // Use longer delay for Safari/iPhone compatibility
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const sweepDelay = isIOS ? 600 : 300;
+
+      setTimeout(() => {
+        Animator.sweepToWinner(winnerSlot, () => {
+          for (let i = 0; i < 4; i++) {
+            const el = document.getElementById('trick-' + i);
+            if (el) el.innerHTML = '';
+          }
+          if (G) { G.trick = []; G._trickAnimating = false; }
+        });
+      }, sweepDelay);
+    });
+
+    socket.on('redeal', ({ reason }) => {
+      UI.setStatus(reason + ' — redealing…');
+      UI.hideBidOverlay();
+    });
+
+    socket.on('round_end', data => {
+      const G = Game.G;
+      if (!G) return;
+      G.bids   = data.bids;
+      G.won    = data.won;
+      G.scores = data.totals;
+      G.roundHistory = data.roundHistory;
+      if (data.names) data.names.forEach((n, i) => { NAMES[i] = n; });
+      UI.showRoundSummary(G, data.scores);
+      SFX.roundEnd();
+    });
+
+    socket.on('game_over', data => {
+      const G = Game.G;
+      if (!G) return;
+      G.scores = data.scores;
+      G.phase  = 'GAME_OVER';
+      if (data.names) data.names.forEach((n, i) => { NAMES[i] = n; });
+      mpActive = false;
+      UI.showGameOver(G);
+    });
+
+    socket.on('player_disconnected', ({ name, seat, timeoutMs }) => {
+      UI.setStatus(`⚠ ${name} disconnected — waiting to reconnect…`);
+      // Show countdown timer
+      const existing = document.getElementById('mp-countdown');
+      if(existing) existing.remove();
+      const cd = document.createElement('div');
+      cd.id = 'mp-countdown';
+      cd.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#f0d080;font-family:Playfair Display,serif;font-size:14px;padding:10px 20px;border-radius:20px;border:1px solid rgba(200,168,75,0.4);z-index:999;text-align:center;';
+      document.body.appendChild(cd);
+      let remaining = Math.floor((timeoutMs || 120000) / 1000);
+      const tick = () => {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        cd.textContent = `⏳ ${name} disconnected — ${m}:${s.toString().padStart(2,'0')} to reconnect`;
+        if(remaining > 0) { remaining--; setTimeout(tick, 1000); }
+        else cd.remove();
+      };
+      tick();
+    });
+
+    socket.on('player_reconnected', ({ name, seat }) => {
+      UI.setStatus(`✅ ${name} reconnected! Resuming…`);
+      // Clear any countdown display
+      const cd = document.getElementById('mp-countdown');
+      if(cd) cd.remove();
+    });
+
+    socket.on('reconnect_failed', ({ name }) => {
+      alert(`${name} did not reconnect in time. Game over.`);
+      leaveRoom();
+    });
+
+    socket.on('reconnect_failed_token', () => {
+      clearSession();
+      // Token invalid — just go to home
+      Home.show();
+    });
+
+    socket.on('illegal_move', () => {
+      SFX.illegal();
+      UI.setStatus('Illegal move!');
+    });
+  }
+
+  function showLobby(code) {
+    hideAll();
+    document.getElementById('mp-room-code').textContent = code;
+    document.getElementById('mp-lobby-title').textContent =
+      isHost ? 'Waiting for Players' : 'Joined Room';
+    document.getElementById('mp-start-btn').style.display = 'none';
+    document.getElementById('screen-mp-lobby').style.display = 'flex';
+    document.getElementById('mp-error').textContent = '';
+  }
+
+  function hideAll() {
+    ['screen-mp','screen-mp-join','screen-mp-lobby'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+  }
+
+  return {
+    showMenu() {
+      hideAll();
+      document.getElementById('screen-mp').style.display = 'flex';
+    },
+
+    back() {
+      hideAll();
+      Home.show();
+    },
+
+    backToMPMenu() {
+      document.getElementById('screen-mp-join').style.display = 'none';
+      document.getElementById('mp-error').textContent = '';
+      document.getElementById('screen-mp').style.display = 'flex';
+    },
+
+    goCreate() {
+      const name = (window.NAMES && window.NAMES[0]) || localStorage.getItem('callbreak_player_name') || 'Player';
+      const rounds = window.TOTAL_ROUNDS || 5;
+      connect();
+      socket.off('connect');
+      socket.on('connect', () => socket.emit('create_room', { name, totalRounds: rounds }));
+      if (socket.connected) socket.emit('create_room', { name, totalRounds: rounds });
+    },
+
+    goJoin() {
+      hideAll();
+      document.getElementById('mp-error').textContent = '';
+      document.getElementById('mp-join-code').value = '';
+      document.getElementById('screen-mp-join').style.display = 'flex';
+      setTimeout(() => document.getElementById('mp-join-code').focus(), 200);
+    },
+
+    joinRoom() {
+      const code = document.getElementById('mp-join-code').value.trim().toUpperCase();
+      if (code.length < 4) {
+        document.getElementById('mp-error').textContent = 'Enter the full 4-letter code.';
+        return;
+      }
+      const name = (window.NAMES && window.NAMES[0]) || localStorage.getItem('callbreak_player_name') || 'Player';
+      connect();
+      socket.off('connect');
+      socket.on('connect', () => socket.emit('join_room', { name, code }));
+      if (socket.connected) socket.emit('join_room', { name, code });
+    },
+
+    startGame() {
+      if (socket) socket.emit('start_game');
+    },
+
+    leaveRoom() {
+      clearSession();
+      if (socket) { socket.disconnect(); socket = null; }
+      mpActive = false;
+      mySeat   = -1;
+      isHost   = false;
+      Game.G   = null;
+      hideAll();
+      Home.show();
+    },
+
+    // Called by Game when player places bid (MP mode)
+    sendBid(bid) {
+      if (socket) socket.emit('place_bid', { bid });
+    },
+
+    // Called by Game when player plays a card (MP mode)
+    sendCard(cardId) {
+      if (socket) socket.emit('play_card', { cardId });
+      // Clear turn alert
+      const G = Game.G;
+      if (G && G._turnAlertInterval) {
+        clearInterval(G._turnAlertInterval);
+        G._turnAlertInterval = null;
+      }
+    },
+
+    isActive() { return mpActive; },
+    getMySeat() { return mySeat; },
+    tryReconnect() { tryAutoReconnect(); },
+  };
+})();
+
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
       navigator.serviceWorker.register('sw.js')

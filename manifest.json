@@ -1,21 +1,15 @@
 {
   "name": "Real Callbreak",
   "short_name": "Callbreak",
-  "description": "Classic South Asian trick-taking card game",
-  "start_url": "/realcallbreak/",
+  "description": "Classic South Asian trick-taking card game. Play online with friends!",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0e1a12",
   "theme_color": "#0e1a12",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
