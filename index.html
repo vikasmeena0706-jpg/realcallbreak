@@ -367,19 +367,18 @@ html, body {
   width: var(--cw);
 }
 
-/* Legal cards — lifted slightly with gold glow to signal playability */
+/* Legal cards — gold glow to signal playability, no automatic lift */
 #hand-0 .card-wrap.legal > div {
   box-shadow: 0 0 0 2px rgba(200,168,75,0.6), 0 4px 12px rgba(0,0,0,0.4);
   border-radius: 5px;
 }
 #hand-0 .card-wrap.legal:hover {
-  transform: translateY(-16px);
   z-index: 10;
 }
-/* Mobile tap feedback — scale down on press */
+/* Mobile tap feedback — lift only on active press */
 #hand-0 .card-wrap.legal:active,
 #hand-0 .card-wrap.legal.pressed {
-  transform: translateY(-20px) scale(0.95);
+  transform: translateY(-14px) scale(0.95);
   z-index: 10;
 }
 
@@ -2765,6 +2764,231 @@ const UI = {
     setTimeout(()=>f.classList.remove('show'),1100);
   },
 
+  playWinFanfare(){
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const t = ctx.currentTime;
+
+      // ── TRUMPET fanfare (sawtooth = brassy) ──
+      const trumpetNotes = [
+        [523, 0.0, 0.25],   // C4
+        [659, 0.25, 0.25],  // E4
+        [784, 0.5, 0.25],   // G4
+        [1047,0.75, 0.4],   // C5 (long)
+        [784, 1.2, 0.15],   // G4
+        [880, 1.4, 0.15],   // A4
+        [1047,1.6, 0.6],    // C5 (finale)
+      ];
+      trumpetNotes.forEach(([freq, start, dur]) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        const f = ctx.createBiquadFilter();
+        o.type = 'sawtooth';
+        o.frequency.value = freq;
+        f.type = 'lowpass'; f.frequency.value = 2200;
+        g.gain.setValueAtTime(0, t + start);
+        g.gain.linearRampToValueAtTime(0.22, t + start + 0.04);
+        g.gain.setValueAtTime(0.18, t + start + dur - 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
+        o.connect(f); f.connect(g); g.connect(ctx.destination);
+        o.start(t + start); o.stop(t + start + dur + 0.05);
+      });
+
+      // ── FIRECRACKER pops (noise bursts) ──
+      const popTimes = [0.1, 0.5, 0.9, 1.3, 1.7, 2.2, 2.6, 3.0, 3.4, 3.8];
+      popTimes.forEach(pt => {
+        const bufSize = ctx.sampleRate * 0.08;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+        const src = ctx.createBufferSource();
+        const g = ctx.createGain();
+        const f = ctx.createBiquadFilter();
+        f.type = 'bandpass';
+        f.frequency.value = 1200 + Math.random() * 800;
+        f.Q.value = 0.8;
+        src.buffer = buf;
+        g.gain.setValueAtTime(0.35, t + pt);
+        g.gain.exponentialRampToValueAtTime(0.001, t + pt + 0.08);
+        src.connect(f); f.connect(g); g.connect(ctx.destination);
+        src.start(t + pt); src.stop(t + pt + 0.1);
+      });
+
+      // ── WHOOSH (firework launch) ──
+      const whooshTimes = [0.0, 0.8, 1.6, 2.4];
+      whooshTimes.forEach(wt => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(200, t + wt);
+        o.frequency.exponentialRampToValueAtTime(1200, t + wt + 0.3);
+        g.gain.setValueAtTime(0.12, t + wt);
+        g.gain.exponentialRampToValueAtTime(0.001, t + wt + 0.3);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t + wt); o.stop(t + wt + 0.35);
+      });
+
+    } catch(e){}
+  },
+
+  launchConfetti(){
+    // Add styles
+    if(!document.getElementById('celebration-style')){
+      const style = document.createElement('style');
+      style.id = 'celebration-style';
+      style.textContent = `
+        @keyframes confettiBurst {
+          0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity:1; }
+          100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.5); opacity:0; }
+        }
+        @keyframes fireworkRise {
+          0%   { transform: translateY(0) scale(1); opacity:1; }
+          70%  { transform: translateY(var(--rise)) scale(1); opacity:1; }
+          100% { transform: translateY(var(--rise)) scale(2.5); opacity:0; }
+        }
+        @keyframes fireworkPop {
+          0%   { transform: translate(0,0) scale(0); opacity:1; }
+          60%  { opacity:1; }
+          100% { transform: translate(var(--px), var(--py)) scale(1); opacity:0; }
+        }
+        @keyframes trophyPop {
+          0%   { transform: scale(0) translateY(40px); opacity:0; }
+          60%  { transform: scale(1.2) translateY(-10px); opacity:1; }
+          80%  { transform: scale(0.95) translateY(0); }
+          100% { transform: scale(1) translateY(0); opacity:1; }
+        }
+        @keyframes trophyFadeOut {
+          0%   { opacity:1; transform:scale(1); }
+          100% { opacity:0; transform:scale(0.8); }
+        }
+        @keyframes popperShoot {
+          0%   { transform: translate(0,0) rotate(var(--rot)) scale(0); opacity:1; }
+          100% { transform: translate(var(--px),var(--py)) rotate(calc(var(--rot) + 360deg)) scale(1); opacity:0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const container = document.createElement('div');
+    container.id = 'celebration-container';
+    container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;';
+    document.body.appendChild(container);
+
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+
+    // ── CONFETTI BURST FROM CENTER ──
+    const colors = ['#f0d080','#ffffff','#ff6b6b','#7ec8e3','#a8d8a8','#f08080','#c8a84b','#ff9ff3'];
+    for(let i = 0; i < 120; i++){
+      const piece = document.createElement('div');
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = 5 + Math.random() * 9;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * (window.innerHeight * 0.7);
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      const rot = (Math.random() - 0.5) * 1080;
+      const delay = Math.random() * 0.4;
+      const dur = 1.5 + Math.random() * 1.5;
+      piece.style.cssText = `
+        position:absolute;
+        width:${size}px; height:${size}px;
+        background:${color};
+        left:${cx}px; top:${cy}px;
+        border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+        --tx:${tx}px; --ty:${ty}px; --rot:${rot}deg;
+        animation: confettiBurst ${dur}s ${delay}s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+      `;
+      container.appendChild(piece);
+    }
+
+    // ── FIREWORKS ──
+    const fwColors = ['#ff6b6b','#ffd700','#7ec8e3','#ff9ff3','#a8d8a8','#ffffff'];
+    const fwPositions = [
+      [cx * 0.4, cy * 1.4],
+      [cx * 1.6, cy * 1.4],
+      [cx, cy * 0.5],
+      [cx * 0.3, cy * 0.8],
+      [cx * 1.7, cy * 0.8],
+    ];
+    fwPositions.forEach(([x, y], fi) => {
+      const delay = fi * 0.5 + 0.2;
+      const color = fwColors[fi % fwColors.length];
+      // Spark particles for each firework
+      for(let s = 0; s < 18; s++){
+        const spark = document.createElement('div');
+        const angle = (s / 18) * Math.PI * 2;
+        const dist = 40 + Math.random() * 60;
+        const px = Math.cos(angle) * dist;
+        const py = Math.sin(angle) * dist;
+        spark.style.cssText = `
+          position:absolute;
+          width:4px; height:4px;
+          background:${color};
+          border-radius:50%;
+          left:${x}px; top:${y}px;
+          box-shadow: 0 0 4px ${color};
+          --px:${px}px; --py:${py}px;
+          animation: fireworkPop 0.8s ${delay}s ease-out forwards;
+        `;
+        container.appendChild(spark);
+      }
+    });
+
+    // ── PARTY POPPERS 🎉 ──
+    const popperPositions = [
+      [40, cy * 1.3, -45],   // bottom left
+      [window.innerWidth - 40, cy * 1.3, 45],  // bottom right
+    ];
+    popperPositions.forEach(([x, y, baseRot]) => {
+      for(let p = 0; p < 12; p++){
+        const particle = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const angle = (baseRot + (Math.random() - 0.5) * 80) * Math.PI / 180;
+        const dist = 60 + Math.random() * 100;
+        const px = Math.cos(angle - Math.PI/2) * dist;
+        const py = -Math.abs(Math.sin(angle - Math.PI/2) * dist) - 20;
+        const rot = (Math.random() - 0.5) * 720;
+        const delay = 0.3 + Math.random() * 0.3;
+        particle.style.cssText = `
+          position:absolute;
+          width:6px; height:6px;
+          background:${color};
+          border-radius:${Math.random() > 0.5 ? '50%' : '1px'};
+          left:${x}px; top:${y}px;
+          --px:${px}px; --py:${py}px; --rot:${rot}deg;
+          animation: popperShoot 1.2s ${delay}s ease-out forwards;
+        `;
+        container.appendChild(particle);
+      }
+    });
+
+    // ── TROPHY ANIMATION (appears after 1.5s) ──
+    setTimeout(() => {
+      const trophy = document.createElement('div');
+      trophy.style.cssText = `
+        position:fixed;
+        top:50%; left:50%;
+        transform:translate(-50%,-50%);
+        font-size:96px;
+        z-index:9999;
+        pointer-events:none;
+        filter: drop-shadow(0 0 20px rgba(255,215,0,0.8));
+        animation: trophyPop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      `;
+      trophy.textContent = '🏆';
+      document.body.appendChild(trophy);
+      // Fade out after 2s
+      setTimeout(() => {
+        trophy.style.animation = 'trophyFadeOut 0.5s ease forwards';
+        setTimeout(() => trophy.remove(), 500);
+      }, 2000);
+    }, 1500);
+
+    // Remove container after everything
+    setTimeout(() => container.remove(), 5000);
+  },
+
   setStatus(msg){
     document.getElementById('status-msg').textContent=msg;
   },
@@ -2936,11 +3160,14 @@ const UI = {
   showGameOver(G){
     const sorted=[0,1,2,3].map(i=>({i,s:G.scores[i]})).sort((a,b)=>b.s-a.s);
     const w=sorted[0].i;
-    document.getElementById('go-title').textContent=w===0?'🏆 You Win!':NAMES[w]+' Wins';
+    // In MP mode, check if the local player's seat won
+    const mySeat = (G._mp && G._mySeat != null) ? G._mySeat : 0;
+    const isPlayerWin = w === mySeat;
+    document.getElementById('go-title').textContent=isPlayerWin?'🏆 You Win!':NAMES[w]+' Wins!';
     const rows=sorted.map((p,rank)=>`
       <tr>
         <td style="color:var(--muted)">${rank+1}.</td>
-        <td>${NAMES[p.i]}</td>
+        <td>${NAMES[p.i]}${p.i===mySeat?' (You)':''}</td>
         <td class="total${p.s<0?' neg':''}">${p.s}</td>
       </tr>`).join('');
     document.getElementById('go-table-wrap').innerHTML=`
@@ -2949,12 +3176,21 @@ const UI = {
         ${rows}
       </table>`;
     // Save to history, clear mid-game save
-    G.phase = 'GAME_OVER'; // mark explicitly so menu hides resume/exit
+    G.phase = 'GAME_OVER';
     History.save(G, sorted[0].i);
     SaveGame.clear();
     document.getElementById('abandon-btn').classList.remove('visible');
     UI.setYourTurn(false);
     this.showOverlay('overlay-game');
+
+    // Play fanfare and confetti
+    if(isPlayerWin){
+      UI.playWinFanfare();
+      UI.launchConfetti();
+      if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+    } else {
+      SFX.roundEnd();
+    }
   },
 
   showHistory(){
@@ -3535,8 +3771,8 @@ const Game = {
     G.firstOfRound = (G.dealer + 1) % 4;
 
     // Re-deal until every player has ≥1 face card and ≥1 trump
-    const raw  = dealValid();
-    G.hands    = raw.map(h => sortHand(h));
+    // (handled below in checkAndDeal with visible message)
+    G.hands    = [[],[],[],[]]; // placeholder, will be set by checkAndDeal
     G.bids     = [null,null,null,null];
     G.won      = [0,0,0,0];
     G.trick    = [];
@@ -3560,10 +3796,53 @@ const Game = {
     document.getElementById('west-hand').innerHTML='';
     document.getElementById('east-hand').innerHTML='';
 
-    // Deal animation — cards fly from center to each player one by one
-    Animator.dealCards(G, ()=>{
-      this.advanceBidding(G);
-    });
+    // Check if initial deal is valid — if not, show reshuffle message
+    const checkAndDeal = (attempt) => {
+      const deck = shuffle(makeDeck());
+      const hands = deal(deck);
+      const invalidPlayers = hands.map((h,i)=>({i,h})).filter(({h})=>!isValidHand(h));
+      
+      if(invalidPlayers.length > 0 && attempt === 0){
+        // First attempt failed — show message and retry
+        const names = invalidPlayers.map(({i})=>NAMES[i]).join(', ');
+        const reason = `${names} ${invalidPlayers.length>1?'have':'has'} no face cards or spades`;
+        G.hands = hands.map(h => sortHand(h));
+        // Show deal animation first, then reshuffle message
+        Animator.dealCards(G, ()=>{
+          this._showReshuffleMessage(`${reason} — reshuffling!`, G, ()=>{
+            startDeal();
+          });
+        });
+        return;
+      }
+      
+      if(hands.every(h => isValidHand(h))){
+        G.hands = hands.map(h => sortHand(h));
+      } else {
+        // Fallback after multiple attempts
+        G.hands = dealValid().map(h => sortHand(h));
+      }
+      
+      // Deal animation then start bidding
+      Animator.dealCards(G, ()=>{
+        this.advanceBidding(G);
+      });
+    };
+    
+    const startDeal = () => {
+      // Clear cards before dealing
+      for(let i=0;i<4;i++) document.getElementById('trick-'+i).innerHTML='';
+      document.getElementById('hand-0').innerHTML='';
+      document.getElementById('north-hand').innerHTML='';
+      document.getElementById('west-hand').innerHTML='';
+      document.getElementById('east-hand').innerHTML='';
+      G.hands = dealValid().map(h => sortHand(h));
+      Animator.dealCards(G, ()=>{
+        this.advanceBidding(G);
+      });
+    };
+    
+    checkAndDeal(0);
   },
 
   // Sequential bidding: bots bid instantly, pause at human
@@ -3575,19 +3854,26 @@ const Game = {
       if(G.bids[pi] === null){
         G.cur = pi;
         if(pi === 0){
-          // Human's turn to bid
-          UI.setStatus(`Your turn to bid (dealer: ${NAMES[G.dealer]})`);
+          // Human's turn to bid — show bids already placed so far
+          const bidsPlaced = G.bids.filter(b => b !== null).length;
+          const dealerName = NAMES[G.dealer];
+          if(bidsPlaced > 0){
+            UI.setStatus(`Your turn to bid (dealer: ${dealerName})`);
+          } else {
+            UI.setStatus(`Your turn to bid first (dealer: ${dealerName})`);
+          }
           UI.showBidOverlay(G);
           UI.renderYourHand(G);
         } else {
-          // Bot bids after a short delay so player can see the sequence
+          // Bot bids after a longer delay so player can clearly see sequence
           UI.setAllDots(pi, G);
-          UI.setStatus(`${NAMES[pi]} is bidding…`);
+          UI.setStatus(`${NAMES[pi]} is thinking…`);
           setTimeout(()=>{
             G.bids[pi] = botBid(G.hands[pi]);
             UI.updatePlayerInfo(G);
-            this.advanceBidding(G);
-          }, 400);
+            UI.setStatus(`${NAMES[pi]} bids ${G.bids[pi]}`);
+            setTimeout(()=>this.advanceBidding(G), 600);
+          }, 700);
         }
         return;
       }
@@ -3595,11 +3881,10 @@ const Game = {
     // All 4 bids placed — check total bid rule
     const totalBid = G.bids.reduce((s,b)=>s+b, 0);
     if(totalBid < 10){
-      // Total bids under 10 — must redeal
-      UI.setStatus('Total bids under 10 — redealing…');
+      // Show clear message before reshuffling
       UI.hideBidOverlay();
-      setTimeout(()=>{
-        // Reset and redeal, keep same round number and dealer
+      UI.setStatus(`Total bids = ${totalBid} (need ≥10) — reshuffling…`);
+      this._showReshuffleMessage(`Total bids only ${totalBid} — need at least 10. Reshuffling!`, G, ()=>{
         G.bids  = [null,null,null,null];
         G.won   = [0,0,0,0];
         G.trick = [];
@@ -3612,10 +3897,35 @@ const Game = {
         UI.updatePlayerInfo(G);
         G.cur = G.firstOfRound;
         this.advanceBidding(G);
-      }, 900);
+      });
       return;
     }
     this.startPlaying(G);
+  },
+
+  // Show a visible reshuffle message then call onDone
+  _showReshuffleMessage(msg, G, onDone){
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:fixed; inset:0; z-index:500;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:rgba(8,16,10,0.92);
+      backdrop-filter:blur(6px);
+      animation:fadeIn 0.3s ease;
+      gap:16px;
+    `;
+    el.innerHTML = `
+      <div style="font-size:42px">🔀</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;color:#f0d080;text-align:center;max-width:280px;line-height:1.5">${msg}</div>
+      <div style="font-size:13px;color:rgba(242,232,208,0.5);letter-spacing:1px">Dealing new cards…</div>
+    `;
+    document.body.appendChild(el);
+    setTimeout(()=>{
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.3s';
+      setTimeout(()=>{ el.remove(); onDone(); }, 300);
+    }, 2200);
   },
 
   startPlaying(G){
@@ -4274,7 +4584,9 @@ UI.showGameOver = function(G){
 // ═══════════════════════════════════════
 const MP = (() => {
   // Auto-detect server URL from current page host
-  const SERVER_URL = 'https://callbreak-server-production.up.railway.app'; // for ngrok/railway: same host, no extra port
+  const SERVER_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://callbreak-server-production.up.railway.app';
 
   let socket = null;
   let mySeat = -1;
@@ -4630,8 +4942,12 @@ const MP = (() => {
     });
 
     socket.on('redeal', ({ reason }) => {
-      UI.setStatus(reason + ' — redealing…');
       UI.hideBidOverlay();
+      if (Game.G) {
+        Game._showReshuffleMessage(reason + ' — reshuffling!', Game.G, () => {});
+      } else {
+        UI.setStatus(reason + ' — redealing…');
+      }
     });
 
     socket.on('round_end', data => {
